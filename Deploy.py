@@ -17,6 +17,13 @@ def check_ssh_connectivity(host):
     except subprocess.TimeoutExpired:
         pass
     return False
+    
+def check_ssh_connectivity_with_nc(host):
+    try:
+        result = subprocess.run(['nc', '-zv', host, '22'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10)
+        return result.returncode == 0
+    except subprocess.TimeoutExpired:
+        return False
 
 def clone_repository(repo_url):
     try:
@@ -30,7 +37,7 @@ if not check_ssh_connectivity('git@github.com'):
     print("No hi ha connectivitat amb github.com per SSH")
     sys.exit(1)
 
-if not check_ssh_connectivity('git@gitlab.ntt.ms'):
+if not check_ssh_connectivity_with_nc('git@gitlab.ntt.ms'):
     print("No hi ha connectivitat amb gitlab.ntt.ms per SSH")
     sys.exit(1)
 
