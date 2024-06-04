@@ -107,6 +107,14 @@ services:
         print(f"Error creant el fitxer docker-compose.override.yml: {e}")
         sys.exit(1)
 
+def run_docker_compose_up(target_dir):
+    try:
+        subprocess.run(['docker', 'compose', 'up', '-d'], cwd=target_dir, check=True)
+        print("Els serveis de Docker s'han iniciat correctament.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error executant 'docker compose up -d': {e}")
+        sys.exit(1)
+
 # Eliminar el directori ./pybunpwsh si ja existeix
 if os.path.exists('./pybunpwsh'):
     try:
@@ -156,5 +164,8 @@ lb_pass_prod = input("Introdueix la contrasenya per l'ID PWD000050492: ")
 
 # Crear el fitxer docker-compose.override.yml amb les contrasenyes introduïdes
 create_docker_compose_override_file('./pybunpwsh', citrix_password, lb_pass_pp, lb_pass_prod)
+
+# Executar 'docker compose up -d' per iniciar els serveis
+run_docker_compose_up('./pybunpwsh')
 
 print("Totes les comprovacions han passat correctament.")
