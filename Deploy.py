@@ -116,6 +116,26 @@ def run_docker_compose_up(target_dir):
         print(f"Error executant 'docker compose up -d': {e}")
         sys.exit(1)
 
+def get_container_id(service_name):
+    try:
+        result = subprocess.run(['docker', 'ps', '-q', '--filter', f"name={service_name}"], stdout=subprocess.PIPE, check=True)
+        container_id = result.stdout.decode().strip()
+        if not container_id:
+            print(f"No s'ha trobat cap contenidor per al servei {service_name}")
+            sys.exit(1)
+        return container_id
+    except subprocess.CalledProcessError as e:
+        print(f"Error obtenint l'ID del contenidor: {e}")
+        sys.exit(1)
+
+def execute_command_in_container(container_id, command):
+    try:
+        subprocess.run(['docker', 'exec', '-it', container_id] + command, check=True)
+        print(f"Comanda '{' '.join(command)}' executada correctament en el contenidor {container_id}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error executant la comanda en el contenidor {container_id}: {e}")
+        sys.exit(1)
+
 # Eliminar el directori ./pybunpwsh si ja existeix
 if os.path.exists('./pybunpwsh'):
     try:
@@ -170,3 +190,11 @@ create_docker_compose_override_file('./pybunpwsh', citrix_password, lb_pass_pp, 
 run_docker_compose_up('./pybunpwsh')
 
 print("Totes les comprovacions han passat correctament.")
+
+# Obtenir l'ID del contenidor
+container_id = get_container_id('pybunpwsh_reports_1')
+
+# Executar la comanda 'ls -lh' dins del contenidor
+execute_command_in_container(container_id, ['ls', '-lh'])
+
+
