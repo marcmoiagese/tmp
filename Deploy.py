@@ -192,9 +192,11 @@ run_docker_compose_up('./pybunpwsh')
 print("Totes les comprovacions han passat correctament.")
 
 # Obtenir l'ID del contenidor
-container_id = get_container_id('pybunpwsh_reports_1')
+container_id = get_container_id('scripts-scripts')
+
+print("!!! Prepara les credencials del vcenter de PCE referents a l'usuari PWD000071468 ")
 
 # Executar la comanda 'ls -lh' dins del contenidor
-execute_command_in_container(container_id, ['ls', '-lh'])
+execute_command_in_container(container_id, ['/usr/bin/pwsh -f "/home/nttrmadm/reports/DRS/DRS-PCE.ps1"'])
 
 
