@@ -30,8 +30,8 @@ if not check_ssh_connectivity('git@github.com'):
     print("No hi ha connectivitat amb github.com per SSH")
     sys.exit(1)
 
-if not check_ssh_connectivity('git@gitlab.pepito'):
-    print("No hi ha connectivitat amb gitlab.pepito per SSH")
+if not check_ssh_connectivity('git@gitlab.ntt.ms'):
+    print("No hi ha connectivitat amb gitlab.ntt.ms per SSH")
     sys.exit(1)
 
 # Clonar el repositori si hi ha connectivitat
