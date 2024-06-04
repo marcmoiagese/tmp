@@ -62,7 +62,7 @@ def copy_ssh_keys(target_dir):
 def create_docker_compose_file(target_dir):
     docker_compose_content = """version: '3.8'
 
-name: Scripts
+name: scripts
 services:
   scripts:
     build: .
