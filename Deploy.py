@@ -65,6 +65,7 @@ def create_docker_compose_file(target_dir):
 services:
   scripts:
     build: .
+    name: Scripts
     volumes:
       - scripts:/home/nttrmadm/reports
     environment:
