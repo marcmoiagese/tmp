@@ -116,12 +116,12 @@ def run_docker_compose_up(target_dir):
         print(f"Error executant 'docker compose up -d': {e}")
         sys.exit(1)
 
-def get_container_id(service_name):
+def get_container_id():
     try:
-        result = subprocess.run(['docker', 'ps', '-q', '--filter', f"name={service_name}"], stdout=subprocess.PIPE, check=True)
+        result = subprocess.run(['docker', 'ps', '-q', '--format', '{{.ID}}', '--latest'], stdout=subprocess.PIPE, check=True)
         container_id = result.stdout.decode().strip()
         if not container_id:
-            print(f"No s'ha trobat cap contenidor per al servei {service_name}")
+            print("No s'ha trobat cap contenidor en execució.")
             sys.exit(1)
         return container_id
     except subprocess.CalledProcessError as e:
