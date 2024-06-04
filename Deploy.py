@@ -59,6 +59,32 @@ def copy_ssh_keys(target_dir):
         print(f"Error copiant les claus SSH: {e}")
         sys.exit(1)
 
+def create_docker_compose_file(target_dir):
+    docker_compose_content = """version: '3.8'
+
+services:
+  reports:
+    build: .
+    volumes:
+      - /opt/scripts:/home/nttrmadm/reports
+    environment:
+      MYHOSTNAME: "evl2401011"
+      MYDOMAIN: "sys.ntt.eu"
+      MYORIGIN: "sys.ntt.eu"
+      MYDESTINATION: "evl2401011, evl2403003, localhost.localdomain, localhost, evl2401011.sys.ntt.eu, sys.ntt.eu"
+      RELAYHOST: "13.95.145.251"
+    extra_hosts:
+      - "pepito.com:1.1.1.1"
+"""
+    try:
+        file_path = os.path.join(target_dir, 'docker-compose.yml')
+        with open(file_path, 'w') as file:
+            file.write(docker_compose_content)
+        print(f"El fitxer docker-compose.yml s'ha creat correctament a {target_dir}")
+    except Exception as e:
+        print(f"Error creant el fitxer docker-compose.yml: {e}")
+        sys.exit(1)
+
 # Eliminar el directori ./pybunpwsh si ja existeix
 if os.path.exists('./pybunpwsh'):
     try:
@@ -97,5 +123,8 @@ for host, port in checks:
         
 # Copiar les claus SSH al directori del repositori clonat
 copy_ssh_keys('./pybunpwsh')
+
+# Crear el fitxer docker-compose.yml
+create_docker_compose_file('./pybunpwsh')
 
 print("Totes les comprovacions han passat correctament.")
