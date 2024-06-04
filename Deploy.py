@@ -130,7 +130,7 @@ def get_container_id():
 
 def execute_command_in_container(container_id, command):
     try:
-        subprocess.run(['docker', 'exec', '-it', container_id] + command, check=True)
+        subprocess.run(['docker exec -it' + container_id] + command, check=True)
         print(f"Comanda '{' '.join(command)}' executada correctament en el contenidor {container_id}")
     except subprocess.CalledProcessError as e:
         print(f"Error executant la comanda en el contenidor {container_id}: {e}")
