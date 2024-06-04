@@ -63,10 +63,10 @@ def create_docker_compose_file(target_dir):
     docker_compose_content = """version: '3.8'
 
 services:
-  reports:
+  scripts:
     build: .
     volumes:
-      - /opt/scripts:/home/nttrmadm/reports
+      - scripts:/home/nttrmadm/reports
     environment:
       MYHOSTNAME: "evl2401011"
       MYDOMAIN: "sys.ntt.eu"
@@ -92,7 +92,7 @@ def create_docker_compose_override_file(target_dir, citrix_password, lb_pass_pp,
     docker_compose_override_content = f"""version: '3.8'
 
 services:
-  reports:
+  scripts:
     environment:
       CITRIX_PASSWORD: "{citrix_password}"
       LB_PASS_PROD: "{lb_pass_prod}"
