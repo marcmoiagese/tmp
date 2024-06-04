@@ -74,7 +74,10 @@ services:
       MYDESTINATION: "evl2401011, evl2403003, localhost.localdomain, localhost, evl2401011.sys.ntt.eu, sys.ntt.eu"
       RELAYHOST: "13.95.145.251"
     extra_hosts:
-      - "pepito.com:1.1.1.1"
+      - "eve6800500.sys.ntt.eu:192.168.190.253"
+      
+volumes:
+  scripts:
 """
     try:
         file_path = os.path.join(target_dir, 'docker-compose.yml')
