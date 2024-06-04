@@ -27,7 +27,7 @@ def check_ssh_connectivity_with_nc(host):
     except subprocess.TimeoutExpired:
         return False
 
-ddef clone_repository(repo_url):
+def clone_repository(repo_url):
     try:
         subprocess.run(['git', 'clone', repo_url], check=True)
         return True
