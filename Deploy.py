@@ -1,6 +1,8 @@
 import subprocess
 import socket
 import sys
+import os
+import shutil
 
 def check_connectivity(host, port):
     try:
@@ -25,11 +27,45 @@ def check_ssh_connectivity_with_nc(host):
     except subprocess.TimeoutExpired:
         return False
 
-def clone_repository(repo_url):
+ddef clone_repository(repo_url):
     try:
         subprocess.run(['git', 'clone', repo_url], check=True)
+        return True
     except subprocess.CalledProcessError:
         print(f"Error clonant el repositori {repo_url}")
+        return False
+
+def copy_ssh_keys(target_dir):
+    ssh_dir = os.path.expanduser("~/.ssh")
+    id_rsa = os.path.join(ssh_dir, "id_rsa")
+    id_rsa_pub = os.path.join(ssh_dir, "id_rsa.pub")
+    
+    if not os.path.exists(id_rsa) or not os.path.exists(id_rsa_pub):
+        print("  ____  _                                     _                  _            _ _   _   _  __ _            ")
+        print(" |  _ \\| | __ _ _   _  __ _  __ _  ___       | |_ _ __ _   _  ___| |_ ___ _ __(_) |_| |_| |/ _(_)_ __   ___ ")
+        print(" | |_) | |/ _` | | | |/ _` |/ _` |/ _ \\  _   | __| '__| | | |/ __| __/ _ \\ '__| | __| __| | |_| | '_ \\ / _ \\")
+        print(" |  __/| | (_| | |_| | (_| | (_| |  __/ | |__| |_| |  | |_| | (__| ||  __/ |  | | |_| |_| |  _| | | | |  __/")
+        print(" |_|   |_|\\__,_|\\__, |\\__,_|\\__, |\\___|  \\____/\\__|_|   \\__,_|\\___|\\__\\___|_|  |_|\\__|\\__|_| |_|_| |_|\\___|")
+        print("                |___/       |___/                                                                          ")
+        print("Please generate a new SSH key and add it to GitLab.")
+        sys.exit(1)
+    
+    try:
+        os.makedirs(target_dir, exist_ok=True)
+        shutil.copy(id_rsa, target_dir)
+        shutil.copy(id_rsa_pub, target_dir)
+        print(f"Les claus SSH s'han copiat correctament a {target_dir}")
+    except Exception as e:
+        print(f"Error copiant les claus SSH: {e}")
+        sys.exit(1)
+
+# Eliminar el directori ./pybunpwsh si ja existeix
+if os.path.exists('./pybunpwsh'):
+    try:
+        shutil.rmtree('./pybunpwsh')
+        print("El directori ./pybunpwsh s'ha eliminat correctament.")
+    except Exception as e:
+        print(f"Error eliminant el directori ./pybunpwsh: {e}")
         sys.exit(1)
 
 # Comprovacions de connectivitat
@@ -42,7 +78,8 @@ if not check_ssh_connectivity_with_nc('gitlab.ntt.ms'):
     sys.exit(1)
 
 # Clonar el repositori si hi ha connectivitat
-clone_repository('git@github.com:marcmoiagese/pybunpwsh.git')
+if not clone_repository('git@github.com:marcmoiagese/pybunpwsh.git'):
+    sys.exit(1)
 
 # Comprovacions de connectivitat a altres adreces IP i ports
 checks = [
@@ -57,5 +94,8 @@ for host, port in checks:
     if not check_connectivity(host, port):
         print(f"No hi ha connectivitat amb {host} al port {port}")
         sys.exit(1)
+        
+# Copiar les claus SSH al directori del repositori clonat
+copy_ssh_keys('./pybunpwsh')
 
 print("Totes les comprovacions han passat correctament.")
