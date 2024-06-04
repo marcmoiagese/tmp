@@ -88,6 +88,25 @@ volumes:
         print(f"Error creant el fitxer docker-compose.yml: {e}")
         sys.exit(1)
 
+def create_docker_compose_override_file(target_dir, citrix_password, lb_pass_pp, lb_pass_prod):
+    docker_compose_override_content = f"""version: '3.8'
+
+services:
+  reports:
+    environment:
+      CITRIX_PASSWORD: "{citrix_password}"
+      LB_PASS_PROD: "{lb_pass_prod}"
+      LB_PASS_PP: "{lb_pass_pp}"
+"""
+    try:
+        file_path = os.path.join(target_dir, 'docker-compose.override.yml')
+        with open(file_path, 'w') as file:
+            file.write(docker_compose_override_content)
+        print(f"El fitxer docker-compose.override.yml s'ha creat correctament a {target_dir}")
+    except Exception as e:
+        print(f"Error creant el fitxer docker-compose.override.yml: {e}")
+        sys.exit(1)
+
 # Eliminar el directori ./pybunpwsh si ja existeix
 if os.path.exists('./pybunpwsh'):
     try:
@@ -129,5 +148,13 @@ copy_ssh_keys('./pybunpwsh')
 
 # Crear el fitxer docker-compose.yml
 create_docker_compose_file('./pybunpwsh')
+
+# Demanar contrasenyes a l'usuari
+citrix_password = input("Introdueix la contrasenya per l'ID PWD000050496: ")
+lb_pass_pp = input("Introdueix la contrasenya per l'ID PWD000045386: ")
+lb_pass_prod = input("Introdueix la contrasenya per l'ID PWD000050492: ")
+
+# Crear el fitxer docker-compose.override.yml amb les contrasenyes introduïdes
+create_docker_compose_override_file('./pybunpwsh', citrix_password, lb_pass_pp, lb_pass_prod)
 
 print("Totes les comprovacions han passat correctament.")
