@@ -68,15 +68,13 @@ services:
   scripts:
     build: .
     volumes:
-      - scripts:/home/nttrmadm/reports
+      - scripts:/home/usuari/reports
     environment:
-      MYHOSTNAME: "evl2401011"
-      MYDOMAIN: "sys.ntt.eu"
-      MYORIGIN: "sys.ntt.eu"
-      MYDESTINATION: "evl2401011, evl2403003, localhost.localdomain, localhost, evl2401011.sys.ntt.eu, sys.ntt.eu"
-      RELAYHOST: "13.95.145.251"
-    extra_hosts:
-      - "eve6800500.sys.ntt.eu:192.168.190.253"
+      MYHOSTNAME: "test"
+      MYDOMAIN: "mdemarc.com"
+      MYORIGIN: "mdemarc.com"
+      MYDESTINATION: "localhost.localdomain, localhost, mdemarc.com"
+      RELAYHOST: "53.92.20.15"
       
 volumes:
   scripts:
@@ -151,20 +149,20 @@ def execute_command_in_container(container_id, command):
 
 def setup_cron_jobs(container_id):
     cron_jobs = [
-        f"*/1 * * * * docker exec -it {container_id} python3.9 /home/nttrmadm/reports/LB-logs/lb-logs-prod.py >> /home/nttrmadm/reports/LB-logs/logs/lb-output.log 2>> /home/nttrmadm/reports/LB-logs/logs/lb-error.log",
-        f"*/1 * * * * docker exec -it {container_id} python3.9 /home/nttrmadm/reports/LB-logs/lb-logs-pp.py >> /home/nttrmadm/reports/LB-logs/logs/lb-output.log 2>> /home/nttrmadm/reports/LB-logs/logs/lb-error.log",
-        f"00 8 * * 1 docker exec -it {container_id} python3.9 /home/nttrmadm/reports/vip_report/nitro_vip.py",
-        f"20 8 * * 1 docker exec -it {container_id} python3.9 /home/nttrmadm/reports/vip_report/email_new_vips.py",
-        f"20 8 * * 1 docker exec -it {container_id} python3.9 /home/nttrmadm/reports/vip_report/email_vips.py",
-        f"30 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/nttrmadm/reports/DRS/DRS-PROD.ps1\"",
-        f"30 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/nttrmadm/reports/DRS/DRS-PP.ps1\"",
-        f"30 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/nttrmadm/reports/DRS/DRS-PCE.ps1\"",
-        f"20 9 * * 1 docker exec -it {container_id} sh /home/nttrmadm/reports/DRS/DRS-email.sh",
-        f"00 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/nttrmadm/reports/Orphaned/ORPH-PROD.ps1\"",
-        f"00 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/nttrmadm/reports/Orphaned/ORPH-PP.ps1\"",
-        f"00 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/nttrmadm/reports/Orphaned/ORPH-PCE.ps1\"",
-        f"20 9 * * 1 docker exec -it {container_id} bash -f \"/home/nttrmadm/reports/Orphaned/ORPH-email.sh\"",
-        f"0 0 * */2 * rm /home/nttrmadm/reports/LB-logs/logs/*"
+        f"*/1 * * * * docker exec -it {container_id} python3.9 /home/usuari/reports/LB-logs/lb-logs-prod.py >> /home/usuari/reports/LB-logs/logs/lb-output.log 2>> /home/usuari/reports/LB-logs/logs/lb-error.log",
+        f"*/1 * * * * docker exec -it {container_id} python3.9 /home/usuari/reports/LB-logs/lb-logs-pp.py >> /home/usuari/reports/LB-logs/logs/lb-output.log 2>> /home/usuari/reports/LB-logs/logs/lb-error.log",
+        f"00 8 * * 1 docker exec -it {container_id} python3.9 /home/usuari/reports/vip_report/nitro_vip.py",
+        f"20 8 * * 1 docker exec -it {container_id} python3.9 /home/usuari/reports/vip_report/email_new_vips.py",
+        f"20 8 * * 1 docker exec -it {container_id} python3.9 /home/usuari/reports/vip_report/email_vips.py",
+        f"30 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/usuari/reports/DRS/DRS-PROD.ps1\"",
+        f"30 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/usuari/reports/DRS/DRS-PP.ps1\"",
+        f"30 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/usuari/reports/DRS/DRS-PCE.ps1\"",
+        f"20 9 * * 1 docker exec -it {container_id} sh /home/usuari/reports/DRS/DRS-email.sh",
+        f"00 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/usuari/reports/Orphaned/ORPH-PROD.ps1\"",
+        f"00 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/usuari/reports/Orphaned/ORPH-PP.ps1\"",
+        f"00 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/usuari/reports/Orphaned/ORPH-PCE.ps1\"",
+        f"20 9 * * 1 docker exec -it {container_id} bash -f \"/home/usuari/reports/Orphaned/ORPH-email.sh\"",
+        f"0 0 * */2 * rm /home/usuari/reports/LB-logs/logs/*"
     ]
     try:
         with tempfile.NamedTemporaryFile(delete=False) as temp_crontab:
@@ -193,8 +191,8 @@ if not check_ssh_connectivity('git@github.com'):
     print("No hi ha connectivitat amb github.com per SSH")
     sys.exit(1)
 
-if not check_ssh_connectivity_with_nc('gitlab.ntt.ms'):
-    print("No hi ha connectivitat amb gitlab.ntt.ms per SSH")
+if not check_ssh_connectivity_with_nc('gitlab.test'):
+    print("No hi ha connectivitat amb gitlab.test per SSH")
     sys.exit(1)
 
 # Clonar el repositori si hi ha connectivitat
@@ -203,11 +201,10 @@ if not clone_repository('git@github.com:marcmoiagese/pybunpwsh.git'):
 
 # Comprovacions de connectivitat a altres adreces IP i ports
 checks = [
-    ('evl6800756.sys.ntt.eu', 443),
-    ('eve6800500.sys.ntt.eu', 443),
-    ('eve2400500.sys.ntt.eu', 443),
-    ('192.168.190.232', 22),
-    ('192.168.58.237', 22)
+    ('vcenterprod.test', 443),
+    ('vcenterpre.test', 443),
+    ('192.158.290.179', 22),
+    ('192.158.98.37', 22)
 ]
 
 for host, port in checks:
@@ -222,9 +219,9 @@ copy_ssh_keys('./pybunpwsh')
 create_docker_compose_file('./pybunpwsh')
 
 # Demanar contrasenyes a l'usuari
-citrix_password = input("Introdueix la contrasenya per l'ID PWD000050496: ")
-lb_pass_pp = input("Introdueix la contrasenya per l'ID PWD000045386: ")
-lb_pass_prod = input("Introdueix la contrasenya per l'ID PWD000050492: ")
+citrix_password = input("Introdueix la contrasenya per l'usuari Us3R: ")
+lb_pass_pp = input("Introdueix la contrasenya per l'usuari Us3R: ")
+lb_pass_prod = input("Introdueix la contrasenya per l'usuari Us3R: ")
 
 # Crear el fitxer docker-compose.override.yml amb les contrasenyes introduïdes
 create_docker_compose_override_file('./pybunpwsh', citrix_password, lb_pass_pp, lb_pass_prod)
@@ -237,21 +234,15 @@ print("Totes les comprovacions han passat correctament.")
 # Obtenir l'ID del contenidor més recent
 container_id = get_latest_container_id()
 
-print("!!! Prepara les credencials del vcenter de PCE referents a l'usuari PWD000071468 ")
+print("!!! Prepara les credencials del vcenter de PRE referents a l'usuari Us3R ")
 
-# Executar la comanda 'pwsh -f "/home/nttrmadm/reports/DRS/DRS-PCE.ps1"' dins del contenidor
-execute_command_in_container(container_id, ['/usr/bin/pwsh', '-f', '/home/nttrmadm/reports/DRS/DRS-PCE.ps1'])
+# Executar la comanda 'pwsh -f "/home/usuari/reports/DRS/DRS-PCE.ps1"' dins del contenidor
+execute_command_in_container(container_id, ['/usr/bin/pwsh', '-f', '/home/usuari/reports/DRS/DRS-PP.ps1'])
 
+print("!!! Prepara les credencials del vcenter de PRO referents a l'usuari Us3R ")
 
-print("!!! Prepara les credencials del vcenter de PRE referents a l'usuari PWD000071472 ")
-
-# Executar la comanda 'pwsh -f "/home/nttrmadm/reports/DRS/DRS-PCE.ps1"' dins del contenidor
-execute_command_in_container(container_id, ['/usr/bin/pwsh', '-f', '/home/nttrmadm/reports/DRS/DRS-PP.ps1'])
-
-print("!!! Prepara les credencials del vcenter de PRO referents a l'usuari PWD000070648 ")
-
-# Executar la comanda 'pwsh -f "/home/nttrmadm/reports/DRS/DRS-PCE.ps1"' dins del contenidor
-execute_command_in_container(container_id, ['/usr/bin/pwsh', '-f', '/home/nttrmadm/reports/DRS/DRS-PROD.ps1'])
+# Executar la comanda 'pwsh -f "/home/usuari/reports/DRS/DRS-PCE.ps1"' dins del contenidor
+execute_command_in_container(container_id, ['/usr/bin/pwsh', '-f', '/home/usuari/reports/DRS/DRS-PROD.ps1'])
 
 setup_cron_jobs(container_id)
 
