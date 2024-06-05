@@ -146,7 +146,21 @@ def execute_command_in_container(container_id, command):
     except subprocess.CalledProcessError as e:
         print(f"Error executant la comanda en el contenidor {container_id}: {e}")
         sys.exit(1)
-
+        
+def check_and_start_postfix(container_id):
+    try:
+        result = subprocess.run(['docker', 'exec', '-it', container_id, 'service', 'postfix', 'status'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output = result.stdout.decode()
+        if "* postfix is running" not in output:
+            print("Postfix no està en funcionament. Iniciant el servei...")
+            subprocess.run(['docker', 'exec', '-it', container_id, 'service', 'postfix', 'start'], check=True)
+            print("Postfix s'ha iniciat correctament.")
+        else:
+            print("Postfix ja està en funcionament.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error comprovant o iniciant el servei Postfix: {e}")
+        sys.exit(1)
+        
 def setup_cron_jobs(container_id):
     cron_jobs = [
         f"*/1 * * * * docker exec -it {container_id} python3.9 /home/usuari/reports/LB-logs/lb-logs-prod.py >> /home/usuari/reports/LB-logs/logs/lb-output.log 2>> /home/usuari/reports/LB-logs/logs/lb-error.log",
@@ -243,6 +257,8 @@ print("!!! Prepara les credencials del vcenter de PRO referents a l'usuari Us3R 
 
 # Executar la comanda 'pwsh -f "/home/usuari/reports/DRS/DRS-PCE.ps1"' dins del contenidor
 execute_command_in_container(container_id, ['/usr/bin/pwsh', '-f', '/home/usuari/reports/DRS/DRS-PROD.ps1'])
+
+check_and_start_postfix(container_id)
 
 setup_cron_jobs(container_id)
 
