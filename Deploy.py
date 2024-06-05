@@ -116,7 +116,19 @@ def run_docker_compose_up(target_dir):
         print(f"Error executant 'docker compose up -d': {e}")
         sys.exit(1)
 
-def get_container_id():
+def get_container_id(service_name):
+    try:
+        result = subprocess.run(['docker', 'ps', '-q', '--format', '{{.ID}}', '--latest'], stdout=subprocess.PIPE, check=True)
+        container_id = result.stdout.decode().strip()
+        if not container_id:
+            print("No s'ha trobat cap contenidor en execució.")
+            sys.exit(1)
+        return container_id
+    except subprocess.CalledProcessError as e:
+        print(f"Error obtenint l'ID del contenidor: {e}")
+        sys.exit(1)
+
+def get_latest_container_id():
     try:
         result = subprocess.run(['docker', 'ps', '-q', '--format', '{{.ID}}', '--latest'], stdout=subprocess.PIPE, check=True)
         container_id = result.stdout.decode().strip()
@@ -130,7 +142,7 @@ def get_container_id():
 
 def execute_command_in_container(container_id, command):
     try:
-        subprocess.run(['docker exec -it' + container_id] + command, check=True)
+        subprocess.run(['docker', 'exec', '-it', container_id] + command, check=True)
         print(f"Comanda '{' '.join(command)}' executada correctament en el contenidor {container_id}")
     except subprocess.CalledProcessError as e:
         print(f"Error executant la comanda en el contenidor {container_id}: {e}")
@@ -191,12 +203,12 @@ run_docker_compose_up('./pybunpwsh')
 
 print("Totes les comprovacions han passat correctament.")
 
-# Obtenir l'ID del contenidor
-container_id = get_container_id('scripts-scripts')
+# Obtenir l'ID del contenidor més recent
+container_id = get_latest_container_id()
 
 print("!!! Prepara les credencials del vcenter de PCE referents a l'usuari PWD000071468 ")
 
-# Executar la comanda 'ls -lh' dins del contenidor
-execute_command_in_container(container_id, ['/usr/bin/pwsh -f "/home/nttrmadm/reports/DRS/DRS-PCE.ps1"'])
+# Executar la comanda 'pwsh -f "/home/nttrmadm/reports/DRS/DRS-PCE.ps1"' dins del contenidor
+execute_command_in_container(container_id, ['/usr/bin/pwsh', '-f', '/home/nttrmadm/reports/DRS/DRS-PCE.ps1'])
 
 
