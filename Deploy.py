@@ -251,6 +251,15 @@ execute_command_in_container(container_id, ['/usr/bin/pwsh', '-f', '/home/nttrma
 print("!!! Prepara les credencials del vcenter de PRO referents a l'usuari PWD000070648 ")
 
 # Executar la comanda 'pwsh -f "/home/nttrmadm/reports/DRS/DRS-PCE.ps1"' dins del contenidor
-execute_command_in_container(container_id, ['/usr/bin/pwsh', '-f', '/home/nttrmadm/reports/DRS/DRS-PP.ps1'])
+execute_command_in_container(container_id, ['/usr/bin/pwsh', '-f', '/home/nttrmadm/reports/DRS/DRS-PROD.ps1'])
 
 setup_cron_jobs(container_id)
+
+# Eliminar els fitxers residuals
+if os.path.exists('./pybunpwsh'):
+    try:
+        shutil.rmtree('./pybunpwsh')
+        print("Cleanup completed")
+    except Exception as e:
+        print(f"Error eliminant el directori ./pybunpwsh: {e}")
+        sys.exit(1)
