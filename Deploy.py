@@ -3,6 +3,7 @@ import socket
 import sys
 import os
 import shutil
+import tempfile
 
 def check_connectivity(host, port):
     try:
@@ -148,6 +149,36 @@ def execute_command_in_container(container_id, command):
         print(f"Error executant la comanda en el contenidor {container_id}: {e}")
         sys.exit(1)
 
+def setup_cron_jobs(container_id):
+    cron_jobs = [
+        f"*/1 * * * * docker exec -it {container_id} python3.9 /home/nttrmadm/reports/LB-logs/lb-logs-prod.py >> /home/nttrmadm/reports/LB-logs/logs/lb-output.log 2>> /home/nttrmadm/reports/LB-logs/logs/lb-error.log",
+        f"*/1 * * * * docker exec -it {container_id} python3.9 /home/nttrmadm/reports/LB-logs/lb-logs-pp.py >> /home/nttrmadm/reports/LB-logs/logs/lb-output.log 2>> /home/nttrmadm/reports/LB-logs/logs/lb-error.log",
+        f"00 8 * * 1 docker exec -it {container_id} python3.9 /home/nttrmadm/reports/vip_report/nitro_vip.py",
+        f"20 8 * * 1 docker exec -it {container_id} python3.9 /home/nttrmadm/reports/vip_report/email_new_vips.py",
+        f"20 8 * * 1 docker exec -it {container_id} python3.9 /home/nttrmadm/reports/vip_report/email_vips.py",
+        f"30 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/nttrmadm/reports/DRS/DRS-PROD.ps1\"",
+        f"30 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/nttrmadm/reports/DRS/DRS-PP.ps1\"",
+        f"30 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/nttrmadm/reports/DRS/DRS-PCE.ps1\"",
+        f"20 9 * * 1 docker exec -it {container_id} sh /home/nttrmadm/reports/DRS/DRS-email.sh",
+        f"00 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/nttrmadm/reports/Orphaned/ORPH-PROD.ps1\"",
+        f"00 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/nttrmadm/reports/Orphaned/ORPH-PP.ps1\"",
+        f"00 8 * * 1 docker exec -it {container_id} pwsh -f \"/home/nttrmadm/reports/Orphaned/ORPH-PCE.ps1\"",
+        f"20 9 * * 1 docker exec -it {container_id} bash -f \"/home/nttrmadm/reports/Orphaned/ORPH-email.sh\"",
+        f"0 0 * */2 * rm /home/nttrmadm/reports/LB-logs/logs/*"
+    ]
+    try:
+        with tempfile.NamedTemporaryFile(delete=False) as temp_crontab:
+            subprocess.run(['crontab', '-l'], stdout=temp_crontab, stderr=subprocess.DEVNULL)
+            with open(temp_crontab.name, 'a') as f:
+                for job in cron_jobs:
+                    f.write(f"{job}\n")
+        subprocess.run(['crontab', temp_crontab.name], check=True)
+        os.remove(temp_crontab.name)
+        print("Els cron jobs s'han configurat correctament.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error configurant els cron jobs: {e}")
+        sys.exit(1)
+
 # Eliminar el directori ./pybunpwsh si ja existeix
 if os.path.exists('./pybunpwsh'):
     try:
@@ -212,3 +243,14 @@ print("!!! Prepara les credencials del vcenter de PCE referents a l'usuari PWD00
 execute_command_in_container(container_id, ['/usr/bin/pwsh', '-f', '/home/nttrmadm/reports/DRS/DRS-PCE.ps1'])
 
 
+print("!!! Prepara les credencials del vcenter de PRE referents a l'usuari PWD000071472 ")
+
+# Executar la comanda 'pwsh -f "/home/nttrmadm/reports/DRS/DRS-PCE.ps1"' dins del contenidor
+execute_command_in_container(container_id, ['/usr/bin/pwsh', '-f', '/home/nttrmadm/reports/DRS/DRS-PP.ps1'])
+
+print("!!! Prepara les credencials del vcenter de PRO referents a l'usuari PWD000070648 ")
+
+# Executar la comanda 'pwsh -f "/home/nttrmadm/reports/DRS/DRS-PCE.ps1"' dins del contenidor
+execute_command_in_container(container_id, ['/usr/bin/pwsh', '-f', '/home/nttrmadm/reports/DRS/DRS-PP.ps1'])
+
+setup_cron_jobs(container_id)
